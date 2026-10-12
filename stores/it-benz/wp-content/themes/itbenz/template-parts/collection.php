@@ -36,7 +36,7 @@ if ( '' === $text ) {
 	/* translators: 1: number of products, 2: category name */
 	$text = sprintf( _n( '%1$d produit disponible dans %2$s.', '%1$d produits disponibles dans %2$s.', (int) $term->count, 'itbenz' ), (int) $term->count, $term->name );
 }
-$color = array( 'butter', 'powder', 'mint', 'sky' )[ $i % 4 ];
+$color = array( 'powder', 'butter', 'mint', 'sky' )[ $i % 4 ];
 ?>
 <section class="section wrap collection" aria-labelledby="col-<?php echo (int) $term->term_id; ?>">
 	<div class="section__head">

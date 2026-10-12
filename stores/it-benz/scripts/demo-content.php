@@ -173,7 +173,7 @@ foreach ( $collections as $slug => $text ) {
 	$tid = itbenz_cat_id( $slug );
 	update_term_meta( $tid, 'itbenz_home', 1 );
 	update_term_meta( $tid, 'itbenz_highlight', $text );
-	$cover = 'coffrets-cadeaux' === $slug ? 'real/coffret-montre.jpg' : 'covers/' . $slug . '.jpg';
+	$cover = 'covers/' . $slug . '.jpg';
 	update_term_meta( $tid, 'itbenz_cover_id', itbenz_sample_media( $cover, 'Collection ' . $slug ) );
 }
 
