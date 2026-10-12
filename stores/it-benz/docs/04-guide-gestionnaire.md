@@ -59,7 +59,7 @@ Le tableau de bord affiche le bloc **« IT-BENZ — Accès rapide »** : nombre 
   * Pour chaque bannière : titre, sur-titre, sous-titre, bouton, lien, couleur de fond, photo. Mettre en *Brouillon* pour masquer.
 * **Produits → Catégories → (modifier)** :
   * *Miniature* = petite image de la tuile catégorie.
-  * *Afficher sur l'accueil* = la catégorie devient une **collection** (4 max).
+  * *Afficher sur l'accueil* = la catégorie devient une **collection** (5 max).
   * *Photo de collection* = grande photo.
   * *Texte mis en avant* = phrase dans la carte colorée.
   * *Ordre* : glisser-déposer les catégories dans la liste.

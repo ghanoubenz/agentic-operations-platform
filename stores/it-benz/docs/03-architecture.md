@@ -52,7 +52,7 @@ Third-party plugins: **WooCommerce only.** On Hostinger, LiteSpeed Cache (free) 
   * hero (Bannière #1)
   * category tiles
   * inspiration card (Bannière #2)
-  * up to 4 collections, each a photo + colour card, 4 products, then a colour card + photo (Bannière #3+)
+  * up to 5 collections, each a photo + colour card, 4 products, then a colour card + photo (Bannière #3+)
   * promotions
   * best sellers
   * new arrivals

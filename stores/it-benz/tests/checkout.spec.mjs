@@ -37,7 +37,7 @@ test('homepage shows hero, categories and product sections', async ({ page }) =>
   await page.goto('/');
   await expect(page.locator('.site-header .brand')).toBeVisible();
   await expect(page.locator('.hero-carousel__slide')).toHaveCount(3);
-  await expect(page.locator('.collection')).toHaveCount(4);
+  await expect(page.locator('.collection')).toHaveCount(5);
   await expect(page.locator('.collection .full-banner')).toHaveCount(2);
   await expect(page.locator('.cat-strip .cat-tile')).toHaveCount(12);
   // Draft policy pages must not be linked publicly.

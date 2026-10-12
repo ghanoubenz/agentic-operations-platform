@@ -28,7 +28,7 @@ if ( $inspire ) {
 }
 
 if ( function_exists( 'wc_get_products' ) ) {
-	$collections = function_exists( 'itbenz_home_collections' ) ? itbenz_home_collections( 4 ) : array();
+	$collections = function_exists( 'itbenz_home_collections' ) ? itbenz_home_collections( 5 ) : array();
 	foreach ( $collections as $i => $term ) {
 		get_template_part(
 			'template-parts/collection',

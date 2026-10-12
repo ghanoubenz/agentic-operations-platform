@@ -205,6 +205,7 @@ $cats = array(
 	'packs'                => 'Packs',
 	'bureautique'          => 'Bureautique & impression',
 	'accessoires'          => 'Accessoires & mobilité',
+	'coffrets-cadeaux'     => 'Coffrets cadeaux',
 );
 $i = 0;
 foreach ( $cats as $slug => $name ) {

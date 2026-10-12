@@ -63,6 +63,7 @@ foreach ( get_posts( array( 'post_type' => 'attachment', 'numberposts' => -1, 'm
 // Extra categories used by the sample catalogue.
 itbenz_cat_id( 'bureautique', 'Bureautique & impression' );
 itbenz_cat_id( 'accessoires', 'Accessoires & mobilité' );
+itbenz_cat_id( 'coffrets-cadeaux', 'Coffrets cadeaux' );
 
 $brand = term_exists( 'IT-BENZ', 'product_brand' ) ?: wp_insert_term( 'IT-BENZ', 'product_brand' );
 
@@ -92,6 +93,12 @@ $products = array(
 	array( 'Batterie externe 20 000 mAh', 'powerbank', array( 'accessoires' ), 5500, 0, 28, false, 'Charge rapide USB-C, deux appareils à la fois.', array( 'capacite' => '20 000 mAh', 'connectique' => 'USB-C, USB-A' ) ),
 	array( 'Chargeur double port 30 W', 'chargeur-blanc', array( 'accessoires' ), 2900, 2400, 35, false, 'Un port USB-C et un port USB-A, format compact.', array( 'connectique' => 'USB-C, USB-A' ) ),
 	array( 'Souris de bureau sans fil', 'souris-bureau', array( 'souris-claviers' ), 1900, 0, 50, false, 'Souris ergonomique pour le bureau, autonomie longue durée.', array( 'connexion' => 'Sans fil 2,4 GHz' ) ),
+	// Owner's product photos (data/sample/real/).
+	array( 'Coffret cadeau montre, 2 stylos et porte-clés', '../real/coffret-montre', array( 'coffrets-cadeaux' ), 8500, 7200, 10, true, 'Coffret prestige : montre chronographe, stylo plume, stylo bille et porte-clés métal.', array( 'couleur' => 'Argent' ) ),
+	array( 'Coffret cadeau carnet, gourde isotherme, stylo et porte-clés', '../real/coffret-bleu', array( 'coffrets-cadeaux' ), 5900, 0, 14, true, 'Carnet en simili-cuir, bouteille isotherme, stylo et porte-clés assortis.', array( 'couleur' => 'Bleu' ) ),
+	array( 'Coffret cadeau mug isotherme, carnet et stylo', '../real/coffret-mug', array( 'coffrets-cadeaux' ), 3900, 3400, 18, true, 'Mug de voyage en inox, carnet et stylo dans une boîte cadeau.', array( 'couleur' => 'Rouge' ) ),
+	array( 'Sac à dos urbain bleu marine', '../real/sac-a-dos-bleu', array( 'accessoires' ), 5400, 0, 12, true, 'Sac à dos léger avec poche zippée frontale et poches latérales.', array( 'couleur' => 'Bleu marine' ) ),
+	array( 'Cahier A4 couverture rigide', '../real/cahier-rouge', array( 'bureautique' ), 650, 0, 70, false, 'Cahier grand format, couverture rigide rouge.', array( 'couleur' => 'Rouge' ) ),
 );
 
 foreach ( $products as $i => [ $name, $photo, $cats, $regular, $sale, $stock, $featured, $short, $attrs ] ) {
@@ -136,7 +143,7 @@ foreach ( $products as $i => [ $name, $photo, $cats, $regular, $sale, $stock, $f
 		wp_set_object_terms( $id, (int) $brand['term_id'], 'product_brand' );
 	}
 	// Some sales history so "Les plus demandés" has content.
-	update_post_meta( $id, 'total_sales', $featured ? 20 - $i : max( 0, 8 - $i % 9 ) );
+	update_post_meta( $id, 'total_sales', $featured ? max( 3, 30 - $i ) : max( 0, 8 - $i % 9 ) );
 	WP_CLI::log( "  #$id $name" );
 }
 
@@ -144,7 +151,7 @@ foreach ( $products as $i => [ $name, $photo, $cats, $regular, $sale, $stock, $f
 $tiles = array(
 	'souris-claviers' => 'souris-sans-fil', 'ecrans' => 'webcam', 'pc-portables-bureau' => 'pc-portable', 'casques-audio' => 'casque-gaming',
 	'gaming' => 'manette', 'stockage' => 'ssd-externe', 'cables-adaptateurs' => 'hub-usb-c-7en1', 'reseau' => 'routeur-wifi',
-	'composants-pc' => 'carte-sd-256', 'packs' => 'clavier-sans-fil', 'bureautique' => 'imprimante', 'accessoires' => 'sac-a-dos',
+	'composants-pc' => 'carte-sd-256', 'packs' => 'clavier-sans-fil', 'bureautique' => 'imprimante', 'accessoires' => 'sac-a-dos', 'coffrets-cadeaux' => '../real/coffret-bleu',
 );
 foreach ( $tiles as $slug => $photo ) {
 	$tid = itbenz_cat_id( $slug );
@@ -152,7 +159,7 @@ foreach ( $tiles as $slug => $photo ) {
 	update_term_meta( $tid, 'itbenz_home', 0 );
 }
 $order = 0;
-foreach ( array( 'souris-claviers', 'gaming', 'stockage', 'bureautique', 'accessoires', 'pc-portables-bureau', 'cables-adaptateurs', 'reseau', 'casques-audio', 'ecrans', 'composants-pc', 'packs' ) as $slug ) {
+foreach ( array( 'souris-claviers', 'gaming', 'coffrets-cadeaux', 'stockage', 'bureautique', 'accessoires', 'pc-portables-bureau', 'cables-adaptateurs', 'reseau', 'casques-audio', 'ecrans', 'composants-pc', 'packs' ) as $slug ) {
 	update_term_meta( itbenz_cat_id( $slug ), 'order', $order++ );
 }
 $collections = array(
@@ -160,12 +167,14 @@ $collections = array(
 	'stockage'    => 'SSD, cartes SD et clés USB pour garder vos fichiers partout.',
 	'bureautique' => 'Imprimante, papier et encre pour le bureau à la maison.',
 	'accessoires' => 'Sacs, chargeurs et batteries pour le travail et les études.',
+	'coffrets-cadeaux' => 'Des coffrets prêts à offrir : montre, stylos, carnet, mug.',
 );
 foreach ( $collections as $slug => $text ) {
 	$tid = itbenz_cat_id( $slug );
 	update_term_meta( $tid, 'itbenz_home', 1 );
 	update_term_meta( $tid, 'itbenz_highlight', $text );
-	update_term_meta( $tid, 'itbenz_cover_id', itbenz_sample_media( 'covers/' . $slug . '.jpg', 'Collection ' . $slug ) );
+	$cover = 'coffrets-cadeaux' === $slug ? 'real/coffret-montre.jpg' : 'covers/' . $slug . '.jpg';
+	update_term_meta( $tid, 'itbenz_cover_id', itbenz_sample_media( $cover, 'Collection ' . $slug ) );
 }
 
 // ---- Banners (owner-supplied visuals, text drawn in the image) -----------------------
