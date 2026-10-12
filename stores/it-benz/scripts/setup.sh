@@ -19,6 +19,13 @@ if [[ $DEMO == 1 && "$ENV_TYPE" == "production" ]]; then
   echo "Refusing --demo on production." >&2; exit 1
 fi
 
+echo "==> Waiting for WordPress files and database"
+for i in $(seq 1 60); do
+  if [[ -f wp-config.php ]] && wp db check --quiet >/dev/null 2>&1; then break; fi
+  [[ $i == 60 ]] && { echo "WordPress is not ready after 3 minutes. Is 'docker compose up -d' running? Check: docker compose logs wordpress" >&2; exit 1; }
+  sleep 3
+done
+
 echo "==> WordPress core"
 if ! wp core is-installed 2>/dev/null; then
   [[ -z "$ADMIN_PASSWORD" ]] && ADMIN_PASSWORD="$(head -c 18 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 20)" && echo "Generated admin password (shown once): $ADMIN_PASSWORD"
