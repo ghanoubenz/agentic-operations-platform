@@ -96,7 +96,7 @@ add_filter(
 			'phone'     => array( 'label' => __( 'Téléphone mobile', 'itbenz' ), 'required' => true, 'priority' => 20 ),
 			'state'     => array( 'label' => __( 'Wilaya', 'itbenz' ), 'required' => true, 'priority' => 50 ),
 			'city'      => array( 'label' => __( 'Commune', 'itbenz' ), 'required' => true, 'priority' => 60 ),
-			'address_1' => array( 'label' => __( 'Adresse de livraison', 'itbenz' ), 'priority' => 70 ),
+			'address_1' => array( 'label' => __( 'Adresse de livraison', 'itbenz' ), 'placeholder' => __( 'Quartier, rue, n° de bâtiment…', 'itbenz' ), 'priority' => 70 ),
 			'postcode'  => array( 'required' => false, 'hidden' => true ),
 			'last_name' => array( 'required' => false, 'hidden' => true ),
 		);
