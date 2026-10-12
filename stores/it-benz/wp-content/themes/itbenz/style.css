@@ -1,0 +1,13 @@
+/*
+Theme Name: IT-BENZ
+Theme URI: https://it-benz.dz/
+Description: Thème e-commerce sombre et éditorial pour IT-BENZ (WooCommerce). Design tokens in assets/css/main.css; business logic lives in the "IT-BENZ Commerce" plugin.
+Version: 1.0.0
+Requires at least: 6.5
+Requires PHP: 8.1
+Author: IT-BENZ
+License: GPL-2.0-or-later
+Text Domain: itbenz
+WC requires at least: 9.6
+*/
+/* Styles are in assets/css/main.css (enqueued with a version for cache-busting). */

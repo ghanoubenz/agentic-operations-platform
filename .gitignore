@@ -7,6 +7,7 @@
 *.p12
 *.crt
 *.csv
+!stores/it-benz/data/*.csv
 *.xlsx
 *.xls
 *.pdf

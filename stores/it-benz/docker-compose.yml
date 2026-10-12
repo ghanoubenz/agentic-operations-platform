@@ -1,0 +1,74 @@
+# IT-BENZ — local / staging stack.
+# Production uses the same theme + plugin folders on the chosen host (see docs/05-deployment.md).
+name: itbenz
+
+services:
+  db:
+    image: mirror.gcr.io/library/mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-itbenz}
+      MARIADB_USER: ${DB_USER:-itbenz}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 20
+
+  wordpress:
+    image: mirror.gcr.io/library/wordpress:php8.3-apache
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: ${DB_NAME:-itbenz}
+      WORDPRESS_DB_USER: ${DB_USER:-itbenz}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('DISALLOW_FILE_EDIT', true);
+        define('WP_POST_REVISIONS', 10);
+        define('WP_ENVIRONMENT_TYPE', getenv('WP_ENVIRONMENT_TYPE') ?: 'staging');
+        define('ITBENZ_SMTP_HOST', getenv('SMTP_HOST') ?: '');
+        define('ITBENZ_SMTP_PORT', (int) (getenv('SMTP_PORT') ?: 0));
+    env_file: .env
+    volumes:
+      - wp:/var/www/html
+      - ./wp-content/themes/itbenz:/var/www/html/wp-content/themes/itbenz
+      - ./wp-content/plugins/itbenz-commerce:/var/www/html/wp-content/plugins/itbenz-commerce
+      - ./scripts/php-uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+
+  cli:
+    image: mirror.gcr.io/library/wordpress:cli-php8.3
+    profiles: ["tools"]
+    user: "33:33"
+    depends_on: [wordpress]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: ${DB_NAME:-itbenz}
+      WORDPRESS_DB_USER: ${DB_USER:-itbenz}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+    env_file: .env
+    volumes:
+      - wp:/var/www/html
+      - ./wp-content/themes/itbenz:/var/www/html/wp-content/themes/itbenz
+      - ./wp-content/plugins/itbenz-commerce:/var/www/html/wp-content/plugins/itbenz-commerce
+      - ./data:/data:ro
+      - ./scripts:/scripts:ro
+      - ./vendor-cache:/vendor-cache:ro
+
+  # Catches every e-mail sent by staging (order notifications) — UI on :8025.
+  mail:
+    image: mirror.gcr.io/axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAIL_UI_PORT:-8025}:8025"
+
+volumes:
+  db:
+  wp:

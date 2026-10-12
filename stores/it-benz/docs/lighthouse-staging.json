@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-12T17:18:22.148Z",
+  "base": "http://localhost:8080",
+  "rows": [
+    {
+      "page": "/",
+      "performance": 96,
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "LCP": "2.6 s",
+      "CLS": "0",
+      "TBT": "30 ms"
+    },
+    {
+      "page": "/boutique/",
+      "performance": 98,
+      "accessibility": 98,
+      "bestPractices": 100,
+      "seo": 100,
+      "LCP": "2.3 s",
+      "CLS": "0",
+      "TBT": "0 ms"
+    },
+    {
+      "page": "/produit/exemple-ecran-27-pouces-qhd/",
+      "performance": 97,
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "LCP": "2.4 s",
+      "CLS": "0",
+      "TBT": "30 ms"
+    },
+    {
+      "page": "/categorie/souris-claviers/",
+      "performance": 99,
+      "accessibility": 98,
+      "bestPractices": 100,
+      "seo": 100,
+      "LCP": "2.0 s",
+      "CLS": "0",
+      "TBT": "20 ms"
+    }
+  ]
+}
