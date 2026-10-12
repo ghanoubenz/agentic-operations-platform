@@ -4,23 +4,27 @@
  * photo, colour category tiles, then repeating "collections").
  *
  * Content sources (all editable in the dashboard):
- *   Bannières #1        → hero headline, subtitle, button, photo
- *   Bannières #2        → "inspiration" card under the categories
- *   Bannières #3+       → coloured card + photo pair closing each collection
+ *   Bannières → "Emplacement": top carousel, inspiration card, or "after collection X".
+ *   "Visuel complet" banners (text drawn in the image) are shown whole, never cropped.
  *   Catégories          → collections (tick "Afficher sur l'accueil", photo, highlight text)
  * Every block hides itself when it has nothing real to show.
  */
 defined( 'ABSPATH' ) || exit;
 get_header();
 
-$banners = function_exists( 'itbenz_get_banners' ) ? itbenz_get_banners( 10 ) : array();
-$hero    = array_shift( $banners );
-$inspire = array_shift( $banners );
+$has_banners = function_exists( 'itbenz_banners_for' );
+$hero        = $has_banners ? itbenz_banners_for( 'hero' ) : array();
+$inspire     = $has_banners ? itbenz_banners_for( 'inspire' ) : array();
 
-get_template_part( 'template-parts/hero', null, array( 'banner' => $hero ) );
+// Ready-made visuals (title drawn in the image) → full-width carousel; otherwise the editorial hero.
+if ( $hero && $hero[0]['full'] ) {
+	get_template_part( 'template-parts/hero-carousel', null, array( 'banners' => $hero ) );
+} else {
+	get_template_part( 'template-parts/hero', null, array( 'banner' => $hero[0] ?? null ) );
+}
 get_template_part( 'template-parts/categories' );
 if ( $inspire ) {
-	get_template_part( 'template-parts/inspire', null, array( 'banner' => $inspire ) );
+	get_template_part( 'template-parts/inspire', null, array( 'banner' => $inspire[0] ) );
 }
 
 if ( function_exists( 'wc_get_products' ) ) {
@@ -32,7 +36,7 @@ if ( function_exists( 'wc_get_products' ) ) {
 			array(
 				'term'   => $term,
 				'index'  => $i,
-				'banner' => $banners[ $i ] ?? null,
+				'banner' => $has_banners ? ( itbenz_banners_for( (string) $term->term_id )[0] ?? null ) : null,
 			)
 		);
 	}

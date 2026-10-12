@@ -203,6 +203,8 @@ $cats = array(
 	'reseau'               => 'Réseau',
 	'composants-pc'        => 'Composants PC',
 	'packs'                => 'Packs',
+	'bureautique'          => 'Bureautique & impression',
+	'accessoires'          => 'Accessoires & mobilité',
 );
 $i = 0;
 foreach ( $cats as $slug => $name ) {

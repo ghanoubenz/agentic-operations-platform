@@ -36,10 +36,10 @@ test.describe.configure({ mode: 'serial' });
 test('homepage shows hero, categories and product sections', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.site-header .brand')).toBeVisible();
-  await expect(page.locator('.hero h1.display')).toBeVisible();
-  await expect(page.locator('.collection')).toHaveCount(3);
-  await expect(page.locator('.inspire__card')).toBeVisible();
-  await expect(page.locator('.cat-strip .cat-tile')).toHaveCount(10);
+  await expect(page.locator('.hero-carousel__slide')).toHaveCount(3);
+  await expect(page.locator('.collection')).toHaveCount(4);
+  await expect(page.locator('.collection .full-banner')).toHaveCount(2);
+  await expect(page.locator('.cat-strip .cat-tile')).toHaveCount(12);
   // Draft policy pages must not be linked publicly.
   await expect(page.locator('.site-footer a[href*="page_id="]')).toHaveCount(0);
   await expect(page.locator('ul.products li.card').first()).toBeVisible();
@@ -48,31 +48,31 @@ test('homepage shows hero, categories and product sections', async ({ page }) =>
 });
 
 test('product page shows specs, stock, SKU and COD', async ({ page }) => {
-  await page.goto('/produit/exemple-ecran-27-pouces-qhd/');
-  await expect(page.locator('.product_title')).toContainText('Écran 27');
+  await page.goto('/produit/pc-portable-156-core-i5-16-go-512-go-ssd/');
+  await expect(page.locator('.product_title')).toContainText('PC portable');
   await expect(page.locator('.pdp-facts')).toContainText('SKU');
-  await expect(page.locator('.spec-table')).toContainText('Résolution');
-  await expect(page.locator('.spec-table')).toContainText('2560 × 1440');
+  await expect(page.locator('.spec-table')).toContainText('Processeur');
+  await expect(page.locator('.spec-table')).toContainText('Intel Core i5');
   await expect(page.locator('.pdp-service')).toContainText('Paiement à la livraison');
   await page.screenshot({ path: shots + 'product-desktop.png', fullPage: true });
 });
 
 test('out-of-stock product cannot be added', async ({ page }) => {
-  await page.goto('/produit/exemple-casque-gaming/');
+  await page.goto('/produit/manette-sans-fil-pour-pc/');
   await expect(page.locator('.pdp-facts .stock.out')).toBeVisible();
   await expect(page.locator('button.single_add_to_cart_button')).toHaveCount(0);
 });
 
 test('cart: multiple products, quantity update, then COD order with wilaya delivery', async ({ page }) => {
-  await addToCart(page, 'exemple-souris-sans-fil', 1);      // 2 900 (sale)
-  await addToCart(page, 'exemple-cable-hdmi-2-m', 2);       // 2 × 900
+  await addToCart(page, 'souris-sans-fil-silencieuse', 1);  // 2 200
+  await addToCart(page, 'cable-usb-c-tresse-1-m', 2);       // 2 × 1 200
   await page.goto('/panier/');
   await expect(page.locator('.cart-count')).toHaveText('3');
   const qty = page.locator('tr.cart_item:has-text("Souris") input.qty');
   await qty.fill('2');
   await page.click('button[name="update_cart"]');
   await expect(page.locator('.woocommerce-message')).toContainText(/mis à jour|updated/i);
-  await expect(page.locator('.cart-subtotal .amount')).toContainText('7 600');
+  await expect(page.locator('.cart-subtotal .amount')).toContainText('6 800');
   await page.screenshot({ path: shots + 'cart-desktop.png', fullPage: true });
 
   // Invalid phone is rejected server-side.
@@ -90,20 +90,20 @@ test('cart: multiple products, quantity update, then COD order with wilaya deliv
   await fillCheckout(page);
   await expect(page.locator('#shipping_method')).toContainText('domicile');
   await expect(page.locator('#shipping_method')).toContainText('stop desk');
-  await expect(page.locator('.order-total .amount')).toContainText('8 200');
+  await expect(page.locator('.order-total .amount')).toContainText('7 400');
   await page.screenshot({ path: shots + 'checkout-desktop.png', fullPage: true });
   // Pick stop desk to check the total is recalculated server-side.
   await page.locator('#shipping_method input[value*="desk"]').check();
   await page.waitForLoadState('networkidle');
-  await expect(page.locator('.order-total .amount')).toContainText('8 000');
+  await expect(page.locator('.order-total .amount')).toContainText('7 200');
   await page.locator('#shipping_method input[value*="home"]').check();
   await page.waitForLoadState('networkidle');
-  await expect(page.locator('.order-total .amount')).toContainText('8 200');
+  await expect(page.locator('.order-total .amount')).toContainText('7 400');
 
   await page.click('#place_order');
   await page.waitForURL(/commande-recue/);
   await expect(page.locator('.woocommerce-order-overview__order')).toContainText('ITB-');
-  await expect(page.locator('.woocommerce-order-overview__total')).toContainText('8 200');
+  await expect(page.locator('.woocommerce-order-overview__total')).toContainText('7 400');
   await expect(page.locator('.woocommerce-order-overview__payment-method')).toContainText('Paiement à la livraison');
   await page.screenshot({ path: shots + 'order-received-desktop.png', fullPage: true });
   const orderNo = (await page.locator('.woocommerce-order-overview__order strong').innerText()).trim();
@@ -116,15 +116,15 @@ test('cart: multiple products, quantity update, then COD order with wilaya deliv
   }, { timeout: 20_000 }).toContain(`Nouvelle commande ${orderNo}`);
 
   // Same phone + same cart again within 3 minutes → duplicate guard.
-  await addToCart(page, 'exemple-souris-sans-fil', 2);
-  await addToCart(page, 'exemple-cable-hdmi-2-m', 2);
+  await addToCart(page, 'souris-sans-fil-silencieuse', 2);
+  await addToCart(page, 'cable-usb-c-tresse-1-m', 2);
   await fillCheckout(page);
   await page.click('#place_order');
   await expect(page.locator('.woocommerce-error')).toContainText('déjà été enregistrée');
 });
 
 test('wilaya without configured delivery price cannot order', async ({ page }) => {
-  await addToCart(page, 'exemple-tapis-de-souris-xl', 1);
+  await addToCart(page, 'ramette-papier-a4-70-g-500-feuilles', 1);
   await fillCheckout(page, { state: 'DZ-33', commune: 'Illizi' });
   await expect(page.locator('.woocommerce-shipping-totals')).toContainText('pas encore disponible');
   await page.click('#place_order');
@@ -143,6 +143,6 @@ test('mobile navigation and layout @mobile', async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
   await page.screenshot({ path: shots + 'home-mobile.png', fullPage: true });
-  await page.goto('/produit/exemple-souris-sans-fil/');
+  await page.goto('/produit/souris-sans-fil-silencieuse/');
   await page.screenshot({ path: shots + 'product-mobile.png', fullPage: true });
 });

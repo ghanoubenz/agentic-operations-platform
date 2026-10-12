@@ -71,6 +71,23 @@ add_action(
 						'url' === $key ? 'url' : 'text'
 					);
 				}
+				$full  = (bool) get_post_meta( $post->ID, '_itbenz_full', true );
+				$place = (string) get_post_meta( $post->ID, '_itbenz_place', true ) ?: 'hero';
+				printf(
+					'<p><label><input type="checkbox" name="itbenz_banner[full]" value="1" %s> <strong>%s</strong></label><br><span class="description">%s</span></p>',
+					checked( $full, true, false ),
+					esc_html__( 'Visuel complet', 'itbenz' ),
+					esc_html__( 'Cochez si le titre et le bouton sont déjà dessinés dans l’image (format 16:9, ex. 1672 × 941 px). L’image est alors affichée entière, sans texte par-dessus.', 'itbenz' )
+				);
+				echo '<p><label><strong>' . esc_html__( 'Emplacement sur l’accueil', 'itbenz' ) . '</strong><br><select name="itbenz_banner[place]">';
+				printf( '<option value="hero" %s>%s</option>', selected( $place, 'hero', false ), esc_html__( 'Carrousel du haut', 'itbenz' ) );
+				printf( '<option value="inspire" %s>%s</option>', selected( $place, 'inspire', false ), esc_html__( 'Carte « inspiration » sous les catégories', 'itbenz' ) );
+				$cats = taxonomy_exists( 'product_cat' ) ? get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false, 'parent' => 0 ) ) : array();
+				foreach ( is_wp_error( $cats ) ? array() : $cats as $t ) {
+					/* translators: %s: category */
+					printf( '<option value="%1$d" %2$s>%3$s</option>', (int) $t->term_id, selected( $place, (string) $t->term_id, false ), esc_html( sprintf( __( 'Après la collection « %s »', 'itbenz' ), $t->name ) ) );
+				}
+				echo '</select></label></p>';
 				$current = get_post_meta( $post->ID, '_itbenz_color', true ) ?: 'onyx';
 				echo '<p><strong>' . esc_html__( 'Couleur de fond', 'itbenz' ) . '</strong><br>';
 				foreach ( ITBENZ_BANNER_COLORS as $key => $hex ) {
@@ -104,6 +121,9 @@ add_action(
 			$v = (string) ( $in[ $key ] ?? '' );
 			update_post_meta( $post_id, '_itbenz_' . $key, 'url' === $key ? esc_url_raw( $v ) : sanitize_text_field( $v ) );
 		}
+		update_post_meta( $post_id, '_itbenz_full', empty( $in['full'] ) ? 0 : 1 );
+		$place = sanitize_key( $in['place'] ?? 'hero' );
+		update_post_meta( $post_id, '_itbenz_place', in_array( $place, array( 'hero', 'inspire' ), true ) || ctype_digit( $place ) ? $place : 'hero' );
 		$color = sanitize_key( $in['color'] ?? 'onyx' );
 		update_post_meta( $post_id, '_itbenz_color', isset( ITBENZ_BANNER_COLORS[ $color ] ) ? $color : 'onyx' );
 		delete_transient( 'itbenz_banners' );
@@ -117,13 +137,13 @@ add_action( 'transition_post_status', static function ( $new, $old, $post ) {
 }, 10, 3 );
 
 /** Published banners, ordered — used by the theme. */
-function itbenz_get_banners( int $limit = 5 ): array {
+function itbenz_get_banners( int $limit = 10 ): array {
 	$cached = get_transient( 'itbenz_banners' );
 	if ( is_array( $cached ) ) {
 		return array_slice( $cached, 0, $limit );
 	}
 	$out = array();
-	foreach ( get_posts( array( 'post_type' => 'itbenz_banner', 'post_status' => 'publish', 'numberposts' => 10, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ) ) ) as $p ) {
+	foreach ( get_posts( array( 'post_type' => 'itbenz_banner', 'post_status' => 'publish', 'numberposts' => 20, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ) ) ) as $p ) {
 		$color = get_post_meta( $p->ID, '_itbenz_color', true ) ?: 'onyx';
 		$out[] = array(
 			'id'       => $p->ID,
@@ -135,8 +155,15 @@ function itbenz_get_banners( int $limit = 5 ): array {
 			'url'      => (string) get_post_meta( $p->ID, '_itbenz_url', true ),
 			'color'    => $color,
 			'hex'      => ITBENZ_BANNER_COLORS[ $color ] ?? '#202124',
+			'full'     => (bool) get_post_meta( $p->ID, '_itbenz_full', true ),
+			'place'    => (string) get_post_meta( $p->ID, '_itbenz_place', true ) ?: 'hero',
 		);
 	}
 	set_transient( 'itbenz_banners', $out, DAY_IN_SECONDS );
 	return array_slice( $out, 0, $limit );
+}
+
+/** Banners for one homepage slot: 'hero', 'inspire' or a product_cat term ID. */
+function itbenz_banners_for( string $place ): array {
+	return array_values( array_filter( itbenz_get_banners( 20 ), static fn( $b ) => $b['place'] === $place ) );
 }

@@ -5,6 +5,14 @@
 defined( 'ABSPATH' ) || exit;
 $b       = $args['banner'];
 $reverse = ! empty( $args['reverse'] );
+if ( $b['full'] && $b['image_id'] ) :
+	?>
+	<a class="full-banner" href="<?php echo esc_url( $b['url'] ?: '#' ); ?>">
+		<?php echo wp_get_attachment_image( $b['image_id'], 'full', false, array( 'loading' => 'lazy', 'sizes' => '(max-width: 1232px) calc(100vw - 32px), 1200px', 'alt' => $b['title'] ) ); ?>
+	</a>
+	<?php
+	return;
+endif;
 ?>
 <div class="feature-pair<?php echo $reverse ? ' feature-pair--reverse' : ''; ?>">
 	<a class="feature-pair__card stage--<?php echo esc_attr( $b['color'] ); ?>" href="<?php echo esc_url( $b['url'] ?: '#' ); ?>">
